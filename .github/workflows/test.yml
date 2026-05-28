@@ -1,8 +1,3 @@
-- name: Copy dylib safely
+- name: Build Rapier
   run: |
-    mkdir -p ios/libs
-    echo "Searching for dylib..."
-    find common/src/main/rust/rapier/target -name "*.dylib" -print || true
-    find common/src/main/rust/rapier/target -name "*.dylib" -exec cp {} ios/libs/ \; || true
-    echo "Done. Output:"
-    ls -R ios/libs || true
+    cargo build --manifest-path common/src/main/rust/rapier/Cargo.toml --release --target aarch64-apple-ios --lib
