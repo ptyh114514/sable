@@ -8,10 +8,8 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 1️⃣ 安装 Rust nightly（必须）
       - name: Install Rust nightly
         run: |
           rustup toolchain install nightly
@@ -19,7 +17,6 @@ jobs:
           rustup target add aarch64-apple-ios
           rustup component add rust-src --toolchain nightly
 
-      # 2️⃣ 直接构建（不改任何 Cargo.toml！）
       - name: Build iOS Rapier
         run: |
           cd common/src/main/rust/rapier
@@ -27,9 +24,9 @@ jobs:
           cargo +nightly build --release \
             --target aarch64-apple-ios \
             -Z build-std=std,panic_abort \
-            -Z build-std-features=panic_immediate_abort
+            -Zunstable-options \
+            -C panic=abort
 
-      # 3️⃣ 上传产物
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
