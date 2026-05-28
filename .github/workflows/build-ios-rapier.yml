@@ -12,13 +12,14 @@ jobs:
 
       - name: Install Rust
         run: |
-          rustup default stable
+          rustup toolchain install 1.82.0
+          rustup default 1.82.0
           rustup target add aarch64-apple-ios
 
       - name: Build Rapier
         run: |
           cd common/src/main/rust/rapier
-          cargo +stable build --release --target aarch64-apple-ios --no-default-features
+          cargo +1.82.0 build --release --target aarch64-apple-ios
 
       - name: Upload
         uses: actions/upload-artifact@v4
