@@ -16,10 +16,13 @@ jobs:
           rustup default nightly
           rustup target add aarch64-apple-ios
 
-      - name: Build Rapier
+      - name: Build with std (IMPORTANT FIX)
         run: |
           cd common/src/main/rust/rapier
-          cargo build --release --target aarch64-apple-ios
+          cargo +nightly build --release \
+            --target aarch64-apple-ios \
+            -Z build-std=std,panic_abort \
+            -Z build-std-features=panic_immediate_abort
 
       - name: Upload
         uses: actions/upload-artifact@v4
