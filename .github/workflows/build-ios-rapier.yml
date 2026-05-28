@@ -18,7 +18,7 @@ jobs:
       - name: Build Rapier
         run: |
           cd common/src/main/rust/rapier
-          cargo +stable build --release --target aarch64-apple-ios
+          cargo +stable build --release --target aarch64-apple-ios --no-default-features
 
       - name: Upload
         uses: actions/upload-artifact@v4
