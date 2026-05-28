@@ -1,0 +1,8 @@
+- name: Copy dylib safely
+  run: |
+    mkdir -p ios/libs
+    echo "Searching for dylib..."
+    find common/src/main/rust/rapier/target -name "*.dylib" -print || true
+    find common/src/main/rust/rapier/target -name "*.dylib" -exec cp {} ios/libs/ \; || true
+    echo "Done. Output:"
+    ls -R ios/libs || true
