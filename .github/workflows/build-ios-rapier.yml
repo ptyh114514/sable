@@ -8,7 +8,8 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install Rust nightly + components
         run: |
@@ -17,15 +18,19 @@ jobs:
           rustup target add aarch64-apple-ios
           rustup component add rust-src --toolchain nightly
 
-      - name: Build Rapier (iOS)
+      - name: Fix panic strategy (important for new nightly)
+        run: |
+          echo "[profile.release]" >> common/src/main/rust/Cargo.toml
+          echo "panic = \"immediate-abort\"" >> common/src/main/rust/Cargo.toml
+
+      - name: Build iOS native (build-std enabled)
         run: |
           cd common/src/main/rust/rapier
           cargo +nightly build --release \
             --target aarch64-apple-ios \
-            -Z build-std=std,panic_abort \
-            -Z build-std-features=panic_immediate_abort
+            -Z build-std=std,panic_abort
 
-      - name: Upload
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ios-native
