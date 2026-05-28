@@ -23,8 +23,8 @@ dashmap = "7.0.0-rc2"
 
 [lib]
 name = "sable_rapier"
+crate-type = ["cdylib", "staticlib"]  # 注意 cdylib 才会生成 dylib
 path = "src/lib.rs"
-crate-type = ["cdylib"]
 
 [[bench]]
 name = "collision_benchmark"
