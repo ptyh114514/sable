@@ -25,10 +25,20 @@ jobs:
       - name: Build Rapier for iOS aarch64
         run: |
           cd common/src/main/rust/rapier
-          echo "===== CURRENT DIR ====="
-          pwd
-          ls
-          echo "===== START BUILD ====="
           cargo build --release --target aarch64-apple-ios
-          echo "===== CHECK TARGET DIR ====="
-          ls -R target/aarch64-apple-ios/release
+
+      - name: Copy built dylib
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/ios/libs
+          # 使用 cargo 输出路径环境变量
+          LIB_DIR="common/src/main/rust/rapier/target/aarch64-apple-ios/release"
+          echo "Looking in $LIB_DIR"
+          if [ -d "$LIB_DIR" ]; then
+            find "$LIB_DIR" -name "*.dylib" -o -name "*.a" | while read file; do
+              echo "Copying $file"
+              cp "$file" $GITHUB_WORKSPACE/ios/libs/
+            done
+          else
+            echo "Error: $LIB_DIR does not exist!"
+            exit 1
+          fi
