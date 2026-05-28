@@ -1,34 +1,28 @@
-name: Build iOS Rapier Native
+name: Build iOS Rapier (staticlib)
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
   build-ios:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - name: Install Rust nightly
+      - name: Install Rust toolchain
         run: |
           rustup toolchain install nightly
           rustup default nightly
           rustup target add aarch64-apple-ios
           rustup component add rust-src --toolchain nightly
 
-      - name: Build iOS Rapier
+      - name: Build iOS static library
         run: |
           cd common/src/main/rust/rapier
 
-          cargo +nightly build --release \
+          RUSTFLAGS="-C panic=abort -Z build-std=core,std" \
+          cargo +nightly build -Z build-std \
             --target aarch64-apple-ios \
-            -Z build-std=std,panic_abort \
-            -Zunstable-options \
-            -C panic=abort
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-native
-          path: common/src/main/rust/rapier/target/aarch64-apple-ios/release/*
+            --release
