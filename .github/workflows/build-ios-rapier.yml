@@ -29,5 +29,10 @@ jobs:
 
       - name: Copy built dylib
         run: |
+          # 创建输出目录
           mkdir -p $GITHUB_WORKSPACE/ios/libs
-          cp target/aarch64-apple-ios/release/librapier.dylib $GITHUB_WORKSPACE/ios/libs/
+          
+          # 找到所有 dylib 或 a 文件并复制过去
+          find common/src/main/rust/rapier/target/aarch64-apple-ios/release -name "*.dylib" -o -name "*.a" | while read file; do
+            cp "$file" $GITHUB_WORKSPACE/ios/libs/
+          done
