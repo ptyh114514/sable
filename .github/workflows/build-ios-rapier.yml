@@ -1,28 +1,33 @@
-name: Build iOS Rapier (staticlib)
+name: Build iOS Rapier
 
 on:
   push:
     branches: [ main ]
+  pull_request:
 
 jobs:
   build-ios:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Install Rust toolchain
+      - name: Install Rust nightly
         run: |
-          rustup toolchain install nightly
-          rustup default nightly
-          rustup target add aarch64-apple-ios
-          rustup component add rust-src --toolchain nightly
+          rustup install nightly-2026-01-29
+          rustup default nightly-2026-01-29
+          rustup component add rust-src
 
-      - name: Build iOS static library
+      - name: Add iOS target
+        run: rustup target add aarch64-apple-ios
+
+      - name: Build Rapier for iOS aarch64
         run: |
           cd common/src/main/rust/rapier
+          cargo build --release --target aarch64-apple-ios --lib
 
-          RUSTFLAGS="-C panic=abort -Z build-std=core,std" \
-          cargo +nightly build -Z build-std \
-            --target aarch64-apple-ios \
-            --release
+      - name: Copy built dylib
+        run: |
+          mkdir -p ../../../../ios/libs
+          cp target/aarch64-apple-ios/release/librapier.dylib ../../../../ios/libs/
