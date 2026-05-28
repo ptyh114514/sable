@@ -22,9 +22,9 @@ rayon = "1.10.0"
 dashmap = "7.0.0-rc2"
 
 [lib]
-crate-type = ["cdylib", "lib"]
 name = "sable_rapier"
 path = "src/lib.rs"
+crate-type = ["cdylib", "staticlib"]
 
 [[bench]]
 name = "collision_benchmark"
