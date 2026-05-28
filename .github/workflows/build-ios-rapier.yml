@@ -11,25 +11,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Rust nightly + components
+      # 1️⃣ 安装 Rust nightly（必须）
+      - name: Install Rust nightly
         run: |
           rustup toolchain install nightly
           rustup default nightly
           rustup target add aarch64-apple-ios
           rustup component add rust-src --toolchain nightly
 
-      - name: Fix panic strategy (important for new nightly)
-        run: |
-          echo "[profile.release]" >> common/src/main/rust/Cargo.toml
-          echo "panic = \"immediate-abort\"" >> common/src/main/rust/Cargo.toml
-
-      - name: Build iOS native (build-std enabled)
+      # 2️⃣ 直接构建（不改任何 Cargo.toml！）
+      - name: Build iOS Rapier
         run: |
           cd common/src/main/rust/rapier
+
           cargo +nightly build --release \
             --target aarch64-apple-ios \
-            -Z build-std=std,panic_abort
+            -Z build-std=std,panic_abort \
+            -Z build-std-features=panic_immediate_abort
 
+      # 3️⃣ 上传产物
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
