@@ -1,3 +1,4 @@
+```yaml
 name: Build iOS Rapier Native
 
 on:
@@ -5,27 +6,39 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-latest
+    runs-on: macos-14
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Install Rust 1.82
+      - name: Install Rust
         run: |
           rustup toolchain install 1.82.0
           rustup default 1.82.0
           rustup target add aarch64-apple-ios --toolchain 1.82.0
 
-      - name: Patch Rust Edition
+      - name: Change edition 2024 -> 2021
         run: |
-          sed -i '' 's/edition = "2024"/edition = "2021"/g' common/src/main/rust/Cargo.toml
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path("common/src/main/rust/Cargo.toml")
+          text = p.read_text()
+
+          text = text.replace('edition = "2024"', 'edition = "2021"')
+
+          p.write_text(text)
+
+          print("patched edition")
+          PY
 
       - name: Build Rapier
         run: |
           cd common/src/main/rust/rapier
           cargo +1.82.0 build --release --target aarch64-apple-ios
 
-      - name: Upload iOS Native
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: ios-native
