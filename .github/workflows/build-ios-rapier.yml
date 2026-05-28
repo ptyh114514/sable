@@ -29,34 +29,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ios-native
-          path: common/src/main/rust/rapier/target/aarch64-apple-ios/release/*name: Build iOS Rapier Native
-
-on:
-  workflow_dispatch:
-
-jobs:
-  build-ios:
-    runs-on: macos-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust nightly
-        run: |
-          rustup toolchain install nightly
-          rustup default nightly
-          rustup target add aarch64-apple-ios
-
-      - name: Build with std (IMPORTANT FIX)
-        run: |
-          cd common/src/main/rust/rapier
-          cargo +nightly build --release \
-            --target aarch64-apple-ios \
-            -Z build-std=std,panic_abort \
-            -Z build-std-features=panic_immediate_abort
-
-      - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-native
           path: common/src/main/rust/rapier/target/aarch64-apple-ios/release/*
