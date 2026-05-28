@@ -5,24 +5,26 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-latest
+    runs-on: macos-14
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: aarch64-apple-ios
-          override: true
+        run: |
+          rustup default stable
+          rustup target add aarch64-apple-ios
+          rustup show
+
+      - name: Verify Targets
+        run: rustup target list --installed
 
       - name: Build Rapier
         run: |
           cd common/src/main/rust/rapier
-          cargo build --release --target aarch64-apple-ios
+          cargo build --target aarch64-apple-ios --release
 
-      - name: Upload iOS native
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: ios-native
