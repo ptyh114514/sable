@@ -22,24 +22,20 @@ jobs:
       - name: Add iOS target
         run: rustup target add aarch64-apple-ios
 
-      # ✅ 关键：生成动态库（dylib）
-      - name: Build Rapier as dylib for iOS
+      - name: Build Rapier for iOS aarch64
         run: |
           cd common/src/main/rust/rapier
-          # cargo.toml 内要有 crate-type = ["cdylib"] 或 ["dylib"] 才能生成 dylib
-          cargo build --release --target aarch64-apple-ios --lib --crate-type cdylib
+          cargo build --release --target aarch64-apple-ios
 
-      # ✅ 上传 artifact
-      - name: Collect output
+      - name: Copy built staticlib / dylib to ios/libs
         run: |
           mkdir -p ios/libs
-          # 现在目录一定存在
-          cp common/src/main/rust/rapier/target/aarch64-apple-ios/release/*.dylib ios/libs/
-          echo "=== files ==="
-          ls -R ios/libs
-
-      - name: Upload iOS build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-rapier-libs
-          path: ios/libs/
+          # 根据 Cargo.toml 的 crate-type 输出选择拷贝
+          if [ -f target/aarch64-apple-ios/release/libsable_rapier.a ]; then
+            cp target/aarch64-apple-ios/release/libsable_rapier.a ios/libs/
+          elif [ -f target/aarch64-apple-ios/release/libsable_rapier.dylib ]; then
+            cp target/aarch64-apple-ios/release/libsable_rapier.dylib ios/libs/
+          else
+            echo "❌ 构建成功，但没有找到任何输出文件"
+            exit 1
+          fi
