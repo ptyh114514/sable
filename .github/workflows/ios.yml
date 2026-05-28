@@ -1,24 +1,4 @@
-name: Build iOS Rapier
-
-on:
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: macos-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-apple-ios
-
-      - name: Build
-        run: cargo build --release --target aarch64-apple-ios
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ios-native
-          path: target/aarch64-apple-ios/release/*
-        
+- name: Copy dylib safely
+  run: |
+    mkdir -p ios/libs
+    find common/src/main/rust/rapier/target -name "*.dylib" -exec cp {} ios/libs/ \; || true
