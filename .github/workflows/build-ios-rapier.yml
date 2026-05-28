@@ -10,30 +10,37 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: Install Rust nightly
         run: |
-          rustup install nightly-2026-01-29
+          rustup toolchain install nightly-2026-01-29
           rustup default nightly-2026-01-29
           rustup component add rust-src
 
       - name: Add iOS target
         run: rustup target add aarch64-apple-ios
 
-      - name: Build Rapier for iOS aarch64
+      - name: Build dylib (FIXED)
         run: |
           cd common/src/main/rust/rapier
-          # 确认 Cargo.toml 已经设置 crate-type = ["cdylib"]
-          cargo build --release --target aarch64-apple-ios
-          echo "构建完成，列出生成的文件："
-          ls -R target/aarch64-apple-ios/release
 
-      - name: Copy built dylib to ios/libs
+          cargo build -Z build-std=core,alloc,std \
+            --release \
+            --target aarch64-apple-ios
+
+          echo "=== CHECK OUTPUT ==="
+          find target -type f -name "*.dylib" || echo "NO DYLIB FOUND"
+          find target -type f -name "*.a" || echo "NO STATIC LIB FOUND"
+
+      - name: Copy output
         run: |
-          mkdir -p $GITHUB_WORKSPACE/ios/libs
-          # 查找 cdylib 文件并复制
-          find common/src/main/rust/rapier/target/aarch64-apple-ios/release -type f -name "*.dylib" -exec cp {} $GITHUB_WORKSPACE/ios/libs/ \;
-          echo "复制完成，输出 ios/libs 目录："
-          ls -R $GITHUB_WORKSPACE/ios/libs
+          mkdir -p ios/libs
+
+          find common/src/main/rust/rapier/target \
+            -type f \( -name "*.dylib" -o -name "*.a" \) \
+            -exec cp {} ios/libs/ \;
+
+          echo "=== FINAL OUTPUT ==="
+          ls -R ios/libs
