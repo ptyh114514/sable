@@ -10,29 +10,42 @@ jobs:
     runs-on: macos-latest
 
     steps:
+      # 1️⃣ 拉代码
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2️⃣ 安装固定 nightly（避免你之前所有编译炸掉）
       - name: Install Rust nightly
         run: |
           rustup install nightly-2026-01-29
           rustup default nightly-2026-01-29
           rustup component add rust-src
 
+      # 3️⃣ iOS target
       - name: Add iOS target
         run: rustup target add aarch64-apple-ios
 
-      - name: Build Rapier for iOS aarch64
+      # 4️⃣ 编译 rapier
+      - name: Build Rapier for iOS
         run: |
           cd common/src/main/rust/rapier
           cargo build --release --target aarch64-apple-ios --lib
 
-      - name: Copy built dylib
+      # 5️⃣ 收集产物（自动找，不写死文件名）
+      - name: Collect output
         run: |
-          # 创建输出目录
-          mkdir -p $GITHUB_WORKSPACE/ios/libs
-          
-          # 找到所有 dylib 或 a 文件并复制过去
-          find common/src/main/rust/rapier/target/aarch64-apple-ios/release -name "*.dylib" -o -name "*.a" | while read file; do
-            cp "$file" $GITHUB_WORKSPACE/ios/libs/
-          done
+          mkdir -p ios/libs
+
+          find common/src/main/rust/rapier/target/aarch64-apple-ios/release \
+            -type f \( -name "*.dylib" -o -name "*.a" \) \
+            -exec cp {} ios/libs/ \;
+
+          echo "=== files ==="
+          ls -R ios/libs
+
+      # 6️⃣ 上传 artifact（你之前看不到文件就是少了这个）
+      - name: Upload iOS build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-rapier-libs
+          path: ios/libs/
