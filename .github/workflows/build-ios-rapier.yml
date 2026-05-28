@@ -24,26 +24,33 @@ jobs:
 
       - name: Build Rapier for iOS aarch64
         run: |
-          # 固定 target 目录，避免找不到
+          # 固定输出目录（关键）
           export CARGO_TARGET_DIR=$GITHUB_WORKSPACE/target-ios
 
-          # 进入 crate 目录，构建 release
+          # 编译指定 crate
           cargo build \
             --manifest-path common/src/main/rust/rapier/Cargo.toml \
             --release \
             --target aarch64-apple-ios
 
-          echo "=== CHECK OUTPUT ==="
-          find $CARGO_TARGET_DIR -type f | head -n 50
+          echo "=== BUILD OUTPUT CHECK ==="
+          find $CARGO_TARGET_DIR -type f | head -n 50 || true
 
-      - name: Copy built dylib and static libraries
+      - name: Collect dylib output
         run: |
           mkdir -p ios/libs
 
-          # 拷贝所有 dylib 和 a 文件
           find $GITHUB_WORKSPACE/target-ios \
             -type f \( -name "*.dylib" -o -name "*.a" \) \
             -exec cp {} ios/libs/ \;
 
-          echo "=== FINAL OUTPUT ==="
-          ls -R ios/libs
+          echo "=== FINAL IOS LIBS ==="
+          ls -R ios/libs || true
+
+      - name: Upload iOS dylib artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-rapier-dylib
+          path: |
+            ios/libs/**/*.dylib
+            ios/libs/**/*.a
