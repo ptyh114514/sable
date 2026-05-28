@@ -1,0 +1,30 @@
+name: Build iOS Rapier Native
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      # 拉取代码
+      - uses: actions/checkout@v4
+
+      # 安装 Rust 并增加 iOS target
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios
+
+      # 编译 Rust native
+      - name: Build Rapier
+        run: |
+          cd common/src/main/rust/rapier
+          cargo build --release --target aarch64-apple-ios
+
+      # 上传编译好的 dylib
+      - name: Upload iOS native
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-native
+          path: common/src/main/rust/rapier/target/aarch64-apple-ios/release/*
