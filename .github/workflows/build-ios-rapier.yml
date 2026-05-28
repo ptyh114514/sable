@@ -8,31 +8,20 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      # 1️⃣ 拉取代码
       - uses: actions/checkout@v4
 
-      # 2️⃣ 安装 Rust stable
       - name: Install Rust
         run: |
           rustup default stable
-
-      # 3️⃣ 安装 iOS target 的标准库
-      - name: Add iOS target
-        run: |
           rustup target add aarch64-apple-ios
 
-      # 4️⃣ 检查 target 是否安装成功
-      - name: Verify iOS target
-        run: rustup target list --installed
-
-      # 5️⃣ 编译 Rapier
       - name: Build Rapier
         run: |
           cd common/src/main/rust/rapier
-          cargo build --release --target aarch64-apple-ios
+          cargo +stable build --release --target aarch64-apple-ios
 
-      # 6️⃣ 上传生成的 dylib
-      - uses: actions/upload-artifact@v4
+      - name: Upload
+        uses: actions/upload-artifact@v4
         with:
           name: ios-native
           path: common/src/main/rust/rapier/target/aarch64-apple-ios/release/*
